@@ -8,6 +8,7 @@ import {
   getRepositoryFiles,
   parseGitHubUrl
 } from "./src/github.js";
+import { collectEvidence, createFallbackTrace } from "./src/trace.js";
 
 const rootDirectory = fileURLToPath(new URL(".", import.meta.url));
 const publicDirectory = join(rootDirectory, "public");
@@ -54,6 +55,16 @@ async function fileRoute(url, response) {
   sendJson(response, 200, { path, content });
 }
 
+async function traceRoute(request, response) {
+  const { repositoryUrl, path, question = "Why does this code exist?" } = await readJson(request);
+  if (!path) throw new Error("Choose a file first.");
+
+  const { owner, repo } = parseGitHubUrl(repositoryUrl || "");
+  const { evidence, searchTerms } = await collectEvidence({ owner, repo, path, question });
+  const trace = createFallbackTrace({ path, evidence });
+  sendJson(response, 200, { ...trace, searchTerms, model: "evidence-only" });
+}
+
 async function staticRoute(url, response) {
   const requestedPath = url.pathname === "/" ? "/index.html" : url.pathname;
   const safePath = normalize(requestedPath).replace(/^(\.\.(\/|\\|$))+/, "");
@@ -94,8 +105,7 @@ const server = createServer(async (request, response) => {
       return;
     }
     if (request.method === "POST" && url.pathname === "/api/trace") {
-      await readJson(request);
-      sendJson(response, 501, { error: "History tracing is added in the next step." });
+      await traceRoute(request, response);
       return;
     }
     if (request.method === "GET") {
