@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="GhostTrace explains why code exists using evidence from repository history."
+    />
+    <title>GhostTrace</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="GhostTrace home">
+        <span class="brand-mark">G</span>
+        <span>GhostTrace</span>
+      </a>
+
+      <form class="repository-form" id="repository-form">
+        <label class="sr-only" for="repository-url">GitHub repository URL</label>
+        <input
+          id="repository-url"
+          type="url"
+          value="https://github.com/Khyati-Kapil/hacktoberfest"
+          placeholder="Paste a public GitHub repository URL"
+        />
+        <button type="submit">Load repository</button>
+      </form>
+
+      <span class="mode-badge" id="mode-badge">Demo mode</span>
+    </header>
+
+    <main class="app-shell">
+      <aside class="file-panel panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Repository</p>
+            <h1 id="repository-name">sample-shop</h1>
+          </div>
+          <span class="branch" id="repository-branch">main</span>
+        </div>
+
+        <div class="file-search">
+          <label class="sr-only" for="file-filter">Filter files</label>
+          <input id="file-filter" placeholder="Filter files..." />
+        </div>
+
+        <nav aria-label="Repository files">
+          <p class="folder-label">Project files</p>
+          <div class="file-list" id="file-list"></div>
+        </nav>
+
+        <div class="scope-note" id="scope-note">
+          <span class="scope-dot"></span>
+          Select a file to trace its history
+        </div>
+      </aside>
+
+      <section class="workspace panel">
+        <div class="workspace-header">
+          <div>
+            <p class="eyebrow">Selected file</p>
+            <h2 id="selected-path">src/auth/session.ts</h2>
+          </div>
+          <span class="language-badge" id="language-badge">TypeScript</span>
+        </div>
+
+        <div class="question-row">
+          <label class="sr-only" for="question">Question about this file</label>
+          <input
+            id="question"
+            value="Why does this code exist?"
+            placeholder="Ask why this code exists..."
+          />
+          <button id="trace-button" type="button">Trace history</button>
+        </div>
+
+        <div class="code-window">
+          <div class="code-titlebar">
+            <span></span><span></span><span></span>
+            <p id="code-filename">session.ts</p>
+          </div>
+          <pre><code id="code-content"></code></pre>
+        </div>
+      </section>
+
+      <aside class="answer-panel panel" aria-live="polite">
+        <div id="empty-state" class="empty-state">
+          <div class="empty-icon">?</div>
+          <h2>Ask about the selected file</h2>
+          <p>GhostTrace will connect the code to its commits, issues, and pull requests.</p>
+        </div>
+
+        <div id="loading-state" class="loading-state hidden">
+          <div class="spinner"></div>
+          <h2>Tracing repository history</h2>
+          <p>Collecting commits and related discussions...</p>
+        </div>
+
+        <div id="answer-content" class="answer-content hidden">
+          <div class="answer-heading">
+            <div>
+              <p class="eyebrow">Why this code exists</p>
+              <h2 id="answer-title"></h2>
+            </div>
+            <span class="confidence" id="confidence"></span>
+          </div>
+
+          <p class="answer-text" id="answer-text"></p>
+
+          <section class="evidence-section">
+            <h3>Evidence from repository history</h3>
+            <div class="evidence-list" id="evidence-list"></div>
+          </section>
+
+          <section class="timeline-section">
+            <h3>How the decision evolved</h3>
+            <ol class="timeline" id="timeline"></ol>
+          </section>
+
+          <p class="grounded-note">
+            <span>✓</span>
+            Answer grounded in repository history
+          </p>
+        </div>
+      </aside>
+    </main>
+
+    <div class="toast hidden" id="toast" role="status"></div>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
