@@ -5,7 +5,7 @@ import {
 
 const STOP_WORDS = new Set([
   "about", "after", "before", "code", "does", "exist", "file", "from", "here", "into", "that", "this",
-  "what", "when", "where", "which", "with", "why", "would"
+  "the", "what", "when", "where", "which", "with", "why", "would"
 ]);
 
 export function deriveSearchTerms(path, question = "") {
