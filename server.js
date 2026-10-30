@@ -9,6 +9,7 @@ import {
   parseGitHubUrl
 } from "./src/github.js";
 import { collectEvidence, createFallbackTrace } from "./src/trace.js";
+import { explainWithGemma } from "./src/ollama.js";
 
 const rootDirectory = fileURLToPath(new URL(".", import.meta.url));
 const publicDirectory = join(rootDirectory, "public");
@@ -60,9 +61,16 @@ async function traceRoute(request, response) {
   if (!path) throw new Error("Choose a file first.");
 
   const { owner, repo } = parseGitHubUrl(repositoryUrl || "");
+  const repository = await getRepository(owner, repo);
+  const content = await getFileContent(owner, repo, path, repository.branch);
   const { evidence, searchTerms } = await collectEvidence({ owner, repo, path, question });
-  const trace = createFallbackTrace({ path, evidence });
-  sendJson(response, 200, { ...trace, searchTerms, model: "evidence-only" });
+  const generatedTrace = await explainWithGemma({ path, question, content, evidence });
+  const trace = generatedTrace || createFallbackTrace({ path, evidence });
+  sendJson(response, 200, {
+    ...trace,
+    searchTerms,
+    model: generatedTrace?.model || "evidence-only"
+  });
 }
 
 async function staticRoute(url, response) {
