@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: ghosttrace
+    runtime: node
+    plan: free
+    buildCommand: ""
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: GITHUB_TOKEN
+        sync: false

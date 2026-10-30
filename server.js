@@ -99,6 +99,13 @@ async function staticRoute(url, response) {
 const server = createServer(async (request, response) => {
   const url = new URL(request.url, `http://${request.headers.host || "localhost"}`);
 
+  response.setHeader("X-Content-Type-Options", "nosniff");
+  response.setHeader("Referrer-Policy", "no-referrer");
+  response.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; connect-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; frame-ancestors 'none'"
+  );
+
   try {
     if (request.method === "GET" && url.pathname === "/api/health") {
       sendJson(response, 200, { status: "ok" });
@@ -116,7 +123,7 @@ const server = createServer(async (request, response) => {
       await traceRoute(request, response);
       return;
     }
-    if (request.method === "GET") {
+    if (request.method === "GET" || request.method === "HEAD") {
       await staticRoute(url, response);
       return;
     }
