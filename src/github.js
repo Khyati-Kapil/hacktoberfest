@@ -1,4 +1,7 @@
+import { MemoryCache } from "./cache.js";
+
 const GITHUB_API = "https://api.github.com";
+const responseCache = new MemoryCache();
 
 const CODE_EXTENSIONS = new Set([
   "js", "jsx", "ts", "tsx", "py", "java", "go", "rs", "rb", "php", "cs", "cpp", "c", "h",
@@ -27,6 +30,9 @@ export function parseGitHubUrl(value) {
 }
 
 async function githubRequest(path) {
+  const cached = responseCache.get(path);
+  if (cached) return cached;
+
   const headers = {
     Accept: "application/vnd.github+json",
     "User-Agent": "GhostTrace",
@@ -44,7 +50,9 @@ async function githubRequest(path) {
     throw new Error(`GitHub request failed with status ${response.status}.`);
   }
 
-  return response.json();
+  const data = await response.json();
+  responseCache.set(path, data);
+  return data;
 }
 
 export async function getRepository(owner, repo) {
