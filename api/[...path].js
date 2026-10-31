@@ -1,1 +1,5 @@
-export { requestHandler as default } from "../server.js";
+import { requestHandler } from "../server.js";
+
+export default async function handler(request, response) {
+  return requestHandler(request, response);
+}
