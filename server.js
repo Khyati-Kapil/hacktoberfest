@@ -138,7 +138,9 @@ async function requestHandler(request, response) {
   }
 }
 
-const isDirectRun = process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1]);
+const isDirectRun = !process.env.VERCEL
+  && process.argv[1]
+  && fileURLToPath(import.meta.url) === resolve(process.argv[1]);
 const server = isDirectRun ? createServer(requestHandler) : null;
 
 if (server) {
