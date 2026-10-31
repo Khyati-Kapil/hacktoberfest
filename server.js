@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
-import { extname, join, normalize } from "node:path";
+import { extname, join, normalize, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   getFileContent,
@@ -8,7 +8,7 @@ import {
   getRepositoryFiles,
   parseGitHubUrl
 } from "./src/github.js";
-import { collectEvidence, createFallbackTrace } from "./src/trace.js";
+import { collectEvidence, createFallbackAnalysis } from "./src/trace.js";
 import { explainWithGemma } from "./src/ollama.js";
 
 const rootDirectory = fileURLToPath(new URL(".", import.meta.url));
@@ -29,6 +29,8 @@ function sendJson(response, status, body) {
 }
 
 async function readJson(request) {
+  if (request.body && typeof request.body === "object") return request.body;
+  if (typeof request.body === "string") return JSON.parse(request.body);
   let body = "";
   for await (const chunk of request) {
     body += chunk;
@@ -57,19 +59,21 @@ async function fileRoute(url, response) {
 }
 
 async function traceRoute(request, response) {
-  const { repositoryUrl, path, question = "Why does this code exist?" } = await readJson(request);
+  const { repositoryUrl, path, question = "Why does this code exist?", snippet = "", mode = "history" } = await readJson(request);
   if (!path) throw new Error("Choose a file first.");
+  if (!new Set(["history", "optimize", "risk", "contributor"]).has(mode)) throw new Error("Choose a valid analysis mode.");
 
   const { owner, repo } = parseGitHubUrl(repositoryUrl || "");
   const repository = await getRepository(owner, repo);
   const content = await getFileContent(owner, repo, path, repository.branch);
-  const { evidence, searchTerms } = await collectEvidence({ owner, repo, path, question });
-  const generatedTrace = await explainWithGemma({ path, question, content, evidence });
-  const trace = generatedTrace || createFallbackTrace({ path, evidence });
+  const evidenceQuestion = snippet ? `${question} ${snippet.slice(0, 500)}` : question;
+  const { evidence, searchTerms } = await collectEvidence({ owner, repo, path, question: evidenceQuestion });
+  const generatedTrace = await explainWithGemma({ path, question, content, snippet, evidence, mode });
+  const trace = generatedTrace || createFallbackAnalysis({ mode, path, content, snippet, evidence });
   sendJson(response, 200, {
     ...trace,
     searchTerms,
-    model: generatedTrace?.model || "evidence-only"
+    model: generatedTrace?.model || (mode === "history" ? "evidence-only" : "local-rules")
   });
 }
 
@@ -96,7 +100,7 @@ async function staticRoute(url, response) {
   }
 }
 
-const server = createServer(async (request, response) => {
+async function requestHandler(request, response) {
   const url = new URL(request.url, `http://${request.headers.host || "localhost"}`);
 
   response.setHeader("X-Content-Type-Options", "nosniff");
@@ -132,10 +136,15 @@ const server = createServer(async (request, response) => {
     const message = error instanceof SyntaxError ? "Request contains invalid JSON." : error.message;
     sendJson(response, 400, { error: message || "Unexpected server error." });
   }
-});
+}
 
-server.listen(port, () => {
-  console.log(`GhostTrace running at http://localhost:${port}`);
-});
+const isDirectRun = process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1]);
+const server = isDirectRun ? createServer(requestHandler) : null;
 
-export { server };
+if (server) {
+  server.listen(port, () => {
+    console.log(`GhostTrace running at http://localhost:${port}`);
+  });
+}
+
+export { requestHandler, server };

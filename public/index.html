@@ -8,13 +8,13 @@
       content="GhostTrace explains why code exists using evidence from repository history."
     />
     <title>GhostTrace</title>
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/styles.clean.css" />
   </head>
-  <body>
+  <body data-theme="abyss" data-palette="maroon-grey">
     <header class="topbar">
       <a class="brand" href="/" aria-label="GhostTrace home">
-        <span class="brand-mark">G</span>
-        <span>GhostTrace</span>
+        <span class="brand-mark">GT</span>
+        <span>GhostTrace <small>code archaeology</small></span>
       </a>
 
       <form class="repository-form" id="repository-form">
@@ -28,7 +28,10 @@
         <button type="submit">Load repository</button>
       </form>
 
-      <span class="mode-badge" id="mode-badge">Demo mode</span>
+      <div class="topbar-context">
+        <span class="event-label">ABYSS NODE · TRACE 01 · HF/26</span>
+        <span class="mode-badge" id="mode-badge">Demo mode</span>
+      </div>
     </header>
 
     <main class="app-shell">
@@ -66,6 +69,15 @@
           <span class="language-badge" id="language-badge">TypeScript</span>
         </div>
 
+        <div class="file-details" id="file-details" aria-label="File details"></div>
+
+        <div class="analysis-modes" id="analysis-modes" aria-label="Analysis mode">
+          <button class="active" data-analysis-mode="history" type="button">History</button>
+          <button data-analysis-mode="optimize" type="button">Optimize</button>
+          <button data-analysis-mode="risk" type="button">Risk scan</button>
+          <button data-analysis-mode="contributor" type="button">Contributor brief</button>
+        </div>
+
         <div class="question-row">
           <label class="sr-only" for="question">Question about this file</label>
           <input
@@ -83,25 +95,37 @@
           </div>
           <pre><code id="code-content"></code></pre>
         </div>
+
+        <div class="snippet-toolbar">
+          <span id="selection-hint">Select a few lines to trace only that decision.</span>
+          <button id="trace-snippet-button" type="button" disabled>Trace selected snippet</button>
+        </div>
       </section>
 
-      <aside class="answer-panel panel" aria-live="polite">
+      <aside class="answer-panel panel" aria-live="polite" data-analysis-mode="history">
+        <div class="answer-toolbar">
+          <span>Analysis report</span>
+          <button id="answer-panel-toggle" type="button" aria-expanded="false">Expand report</button>
+        </div>
+
         <div id="empty-state" class="empty-state">
           <div class="empty-icon">?</div>
-          <h2>Ask about the selected file</h2>
-          <p>GhostTrace will connect the code to its commits, issues, and pull requests.</p>
+          <h2>Trace the decision</h2>
+          <p>Ask about the whole file, or select a small snippet to understand one decision.</p>
+          <div class="empty-points"><span>01</span>Evidence from commits, issues and PRs</div>
+          <div class="empty-points"><span>02</span>Clear confidence, never invented context</div>
         </div>
 
         <div id="loading-state" class="loading-state hidden">
           <div class="spinner"></div>
-          <h2>Tracing repository history</h2>
-          <p>Collecting commits and related discussions...</p>
+          <h2 id="loading-title">Tracing repository history</h2>
+          <p id="loading-text">Collecting commits and related discussions...</p>
         </div>
 
         <div id="answer-content" class="answer-content hidden">
           <div class="answer-heading">
             <div>
-              <p class="eyebrow">Why this code exists</p>
+              <p class="eyebrow" id="answer-eyebrow">Why this code exists</p>
               <h2 id="answer-title"></h2>
             </div>
             <span class="confidence" id="confidence"></span>
@@ -109,12 +133,19 @@
 
           <p class="answer-text" id="answer-text"></p>
 
-          <section class="evidence-section">
+          <section class="mode-visual" id="mode-visual"></section>
+
+          <section class="insights-section hidden" id="insights-section">
+            <h3 id="insights-heading">Actionable findings</h3>
+            <ol class="insights-list" id="insights-list"></ol>
+          </section>
+
+          <section class="evidence-section" id="evidence-section">
             <h3>Evidence from repository history</h3>
             <div class="evidence-list" id="evidence-list"></div>
           </section>
 
-          <section class="timeline-section">
+          <section class="timeline-section" id="timeline-section">
             <h3>How the decision evolved</h3>
             <ol class="timeline" id="timeline"></ol>
           </section>

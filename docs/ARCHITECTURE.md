@@ -19,7 +19,7 @@ Evidence-backed answer
 
 ## 1. Browser interface
 
-The browser displays the repository files, selected source code, explanation, evidence cards, and timeline. It never receives a GitHub token.
+The browser displays repository files, selected source code, snippet selection, four analysis modes, evidence cards, timelines, comparisons, risk scores, and contributor checklists. It never receives a GitHub token.
 
 ## 2. Node.js server
 
@@ -40,6 +40,6 @@ The trace route:
 3. Searches related issues and pull requests.
 4. Sends the code and numbered evidence to Gemma.
 5. Accepts only source numbers that were actually supplied.
-6. Returns the explanation with the original evidence links.
+6. Returns the mode-specific report with the original evidence links.
 
-Gemma runs locally through Ollama. When Ollama is unavailable, the server builds a cautious evidence-only summary so the application remains usable.
+Gemma runs locally through Ollama. When Ollama is unavailable, the server builds a cautious evidence-only summary or deterministic optimization, risk, and contributor results. On Vercel, the same request handler runs through `api/[...path].js`.

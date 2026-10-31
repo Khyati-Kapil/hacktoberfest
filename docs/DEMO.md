@@ -13,7 +13,9 @@ GhostTrace helps new contributors understand why unfamiliar code exists by conne
 5. Read the explanation about slow-network login failures.
 6. Show the issue, pull request, and commit evidence cards.
 7. Point out the decision timeline and confidence score.
-8. Paste a public GitHub repository URL to show that the same flow works with live data.
+8. Switch to **Optimize** and show the current-versus-recommended comparison.
+9. Switch to **Risk scan** and show the risk dashboard.
+10. Expand the report panel and highlight a code snippet.
 
 ## Key message for judges
 

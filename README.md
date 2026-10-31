@@ -8,8 +8,9 @@ New contributors often understand what a function does but cannot find the origi
 
 1. Paste a public GitHub repository URL.
 2. Select a source file.
-3. Ask why the code exists.
-4. Review a simple explanation, confidence score, sources, and timeline.
+3. Optionally select a code snippet.
+4. Choose History, Optimize, Risk scan, or Contributor brief.
+5. Review the mode-specific report, confidence, and sources.
 
 If a local model is unavailable, GhostTrace still shows an evidence-only result. If the history is weak, it says so instead of inventing a reason.
 
@@ -17,11 +18,14 @@ If a local model is unavailable, GhostTrace still shows an evidence-only result.
 
 - Public GitHub repository browser
 - File viewer and filter
+- File and snippet-level analysis
+- History, optimization, risk, and contributor modes
 - File-specific commit history
 - Related issue and pull-request search
 - Local Gemma explanations through Ollama
 - Evidence cards that open the original GitHub source
 - Visual decision timeline
+- Expandable analysis report
 - Honest confidence and missing-history states
 - Built-in sample repository for offline demonstrations
 
@@ -74,6 +78,26 @@ npm start
 
 `GITHUB_TOKEN` raises the public GitHub API rate limit. Never commit a token.
 
+## Deploy to Vercel
+
+GhostTrace includes a Vercel serverless adapter and serves the frontend from `public/`.
+
+1. Import `Khyati-Kapil/hacktoberfest` at [vercel.com/new](https://vercel.com/new).
+2. Leave **Framework Preset** as `Other`.
+3. Leave the root directory as the repository root.
+4. Add `GITHUB_TOKEN` under **Project Settings → Environment Variables** for Production, Preview, and Development.
+5. Click **Deploy**.
+
+The local Ollama process cannot run inside Vercel. On Vercel, GhostTrace immediately uses its evidence-only and local-rule fallbacks unless `OLLAMA_URL` points to a separately hosted, HTTPS-accessible Ollama-compatible service. Do not expose an unauthenticated Ollama server to the public internet.
+
+To deploy from the CLI instead:
+
+```bash
+npx vercel
+npx vercel env add GITHUB_TOKEN
+npx vercel --prod
+```
+
 ## Test
 
 ```bash
@@ -85,7 +109,7 @@ npm test
 ```text
 public/             Browser interface
   index.html        Application layout
-  styles.css        Visual design
+  styles.clean.css  Visual design
   app.js            UI behavior and API calls
   demo-data.js      Offline demonstration
 src/
@@ -95,6 +119,8 @@ src/
   cache.js          Short-lived response cache
 test/               Unit tests
 server.js           HTTP server and API routes
+api/                 Vercel serverless adapter
+vercel.json          Vercel configuration
 ```
 
 See [Architecture](docs/ARCHITECTURE.md) for the request flow and [Demo Guide](docs/DEMO.md) for a short presentation script.

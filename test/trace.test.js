@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createFallbackTrace, deriveSearchTerms } from "../src/trace.js";
+import { createFallbackAnalysis, createFallbackTrace, deriveSearchTerms } from "../src/trace.js";
 
 test("deriveSearchTerms combines useful filename and question words", () => {
   assert.equal(
@@ -29,4 +29,25 @@ test("createFallbackTrace points to the strongest discussion", () => {
   });
   assert.equal(trace.title, "Fix session expiry");
   assert.equal(trace.confidence, 62);
+});
+
+test("optimization fallback returns actionable insights", () => {
+  const result = createFallbackAnalysis({
+    mode: "optimize",
+    path: "src/load.js",
+    content: "for (const item of items) { await load(item); }",
+    evidence: []
+  });
+  assert.equal(result.title, "Optimization review for load.js");
+  assert.ok(result.insights.length >= 2);
+});
+
+test("risk fallback identifies browser storage", () => {
+  const result = createFallbackAnalysis({
+    mode: "risk",
+    path: "src/token.js",
+    content: "localStorage.setItem('token', value);",
+    evidence: []
+  });
+  assert.match(result.insights[0], /Browser storage/);
 });
