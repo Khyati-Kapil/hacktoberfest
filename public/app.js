@@ -288,9 +288,6 @@ async function traceSelectedFile() {
       })
     });
     renderAnswer(trace);
-    if (trace.model === "evidence-only") showToast("Ollama unavailable; showing evidence-only result.");
-    else if (trace.model === "local-rules") showToast("Ollama unavailable; showing the local analysis result.");
-    else showToast(`Analyzed with ${trace.model}.`);
   } catch (error) {
     resetAnswer();
     showToast(error.message, true);
