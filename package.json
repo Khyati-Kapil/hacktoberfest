@@ -5,9 +5,9 @@
   "type": "module",
   "description": "Explain why code exists using evidence from repository history.",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js",
-    "vercel-build": "node --check server.js",
+    "start": "node local-server.js",
+    "dev": "node --watch local-server.js",
+    "vercel-build": "node --check local-server.js && node --check 'api/[...path].js'",
     "test": "node --test"
   },
   "engines": {

@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
-import { extname, join, normalize } from "node:path";
+import { extname, join, normalize, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   getFileContent,
@@ -138,10 +138,14 @@ async function requestHandler(request, response) {
   }
 }
 
-const server = createServer(requestHandler);
+const isDirectRun = process.argv[1]
+  && fileURLToPath(import.meta.url) === resolve(process.argv[1]);
+const server = isDirectRun ? createServer(requestHandler) : null;
 
-server.listen(port, () => {
-  console.log(`GhostTrace running at http://localhost:${port}`);
-});
+if (server) {
+  server.listen(port, () => {
+    console.log(`GhostTrace running at http://localhost:${port}`);
+  });
+}
 
 export { requestHandler, server };
