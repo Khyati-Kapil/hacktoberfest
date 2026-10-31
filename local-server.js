@@ -9,7 +9,7 @@ import {
   parseGitHubUrl
 } from "./src/github.js";
 import { collectEvidence, createFallbackAnalysis } from "./src/trace.js";
-import { explainWithGemma } from "./src/ollama.js";
+import { explainCode } from "./src/ai.js";
 
 const rootDirectory = fileURLToPath(new URL(".", import.meta.url));
 const publicDirectory = join(rootDirectory, "public");
@@ -68,7 +68,7 @@ async function traceRoute(request, response) {
   const content = await getFileContent(owner, repo, path, repository.branch);
   const evidenceQuestion = snippet ? `${question} ${snippet.slice(0, 500)}` : question;
   const { evidence, searchTerms } = await collectEvidence({ owner, repo, path, question: evidenceQuestion });
-  const generatedTrace = await explainWithGemma({ path, question, content, snippet, evidence, mode });
+  const generatedTrace = await explainCode({ path, question, content, snippet, evidence, mode });
   const trace = generatedTrace || createFallbackAnalysis({ mode, path, content, snippet, evidence });
   sendJson(response, 200, {
     ...trace,

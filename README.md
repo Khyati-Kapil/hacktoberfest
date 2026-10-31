@@ -2,7 +2,7 @@
 
 GhostTrace explains **why code exists** by connecting a file to the commits, issues, and pull requests that shaped it.
 
-New contributors often understand what a function does but cannot find the original reason behind it. GhostTrace gathers the repository history, asks a local Gemma model to explain it in simple language, and keeps every answer linked to evidence.
+New contributors often understand what a function does but cannot find the original reason behind it. GhostTrace gathers the repository history, asks a configured AI model to explain it in simple language, and keeps every answer linked to evidence.
 
 ## What it does
 
@@ -22,7 +22,7 @@ If a local model is unavailable, GhostTrace still shows an evidence-only result.
 - History, optimization, risk, and contributor modes
 - File-specific commit history
 - Related issue and pull-request search
-- Local Gemma explanations through Ollama
+- Hosted AI through Groq, or local models through Ollama
 - Evidence cards that open the original GitHub source
 - Visual decision timeline
 - Expandable analysis report
@@ -34,7 +34,7 @@ If a local model is unavailable, GhostTrace still shows an evidence-only result.
 - Node.js built-in HTTP server
 - Plain HTML, CSS, and JavaScript
 - GitHub REST API
-- Ollama with Gemma 3
+- Groq API or Ollama
 - Node's built-in test runner
 
 There are no runtime package dependencies, which keeps setup and presentation simple.
@@ -55,6 +55,10 @@ npm start
 Open [http://localhost:8000](http://localhost:8000).
 
 The sample repository works immediately. Paste a public GitHub URL to use live data.
+
+## Enable Groq
+
+Set `GROQ_API_KEY` on the server (or in Vercel environment variables). Groq takes priority when this key is present. The default model is `openai/gpt-oss-20b`; optionally override it with `GROQ_MODEL`. Keys stay on the backend. Redeploy after changing Vercel environment variables.
 
 ## Enable Gemma
 
@@ -86,9 +90,10 @@ GhostTrace includes a Vercel serverless adapter and serves the frontend from `pu
 2. Leave **Framework Preset** as `Other`.
 3. Leave the root directory as the repository root.
 4. Add `GITHUB_TOKEN` under **Project Settings → Environment Variables** for Production, Preview, and Development.
-5. Click **Deploy**.
+5. Add `GROQ_API_KEY` to enable hosted AI explanations.
+6. Click **Deploy**.
 
-The local Ollama process cannot run inside Vercel. On Vercel, GhostTrace immediately uses its evidence-only and local-rule fallbacks unless `OLLAMA_URL` points to a separately hosted, HTTPS-accessible Ollama-compatible service. Do not expose an unauthenticated Ollama server to the public internet.
+The local Ollama process cannot run inside Vercel. On Vercel, use `GROQ_API_KEY` for hosted AI. Without a key or a separately hosted `OLLAMA_URL`, GhostTrace uses evidence-only and local-rule fallbacks. Do not expose an unauthenticated Ollama server to the public internet.
 
 To deploy from the CLI instead:
 
@@ -115,10 +120,10 @@ public/             Browser interface
 src/
   github.js         GitHub REST API client
   trace.js          Evidence collection and fallback explanation
-  ollama.js         Local Gemma connection
+  ai.js             Groq and local Ollama connections
   cache.js          Short-lived response cache
 test/               Unit tests
-server.js           HTTP server and API routes
+local-server.js     HTTP server and API routes
 api/                 Vercel serverless adapter
 vercel.json          Vercel configuration
 ```
