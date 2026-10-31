@@ -45,9 +45,16 @@ async function githubRequest(path) {
 
   const response = await fetch(`${GITHUB_API}${path}`, { headers });
   if (!response.ok) {
+    let detail = "";
+    try {
+      const payload = await response.json();
+      detail = payload.message ? ` ${payload.message}` : "";
+    } catch {
+      // Keep the status message when GitHub does not return JSON.
+    }
     if (response.status === 404) throw new Error("Repository or file not found.");
     if (response.status === 403) throw new Error("GitHub rate limit reached. Add GITHUB_TOKEN and try again.");
-    throw new Error(`GitHub request failed with status ${response.status}.`);
+    throw new Error(`GitHub request failed with status ${response.status}.${detail}`);
   }
 
   const data = await response.json();

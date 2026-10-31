@@ -29,10 +29,13 @@ function uniqueEvidence(items) {
 
 export async function collectEvidence({ owner, repo, path, question }) {
   const searchTerms = deriveSearchTerms(path, question);
-  const [commits, discussions] = await Promise.all([
+  const [commitResult, discussionResult] = await Promise.allSettled([
     getFileCommits(owner, repo, path),
     searchTerms ? searchRepositoryDiscussions(owner, repo, searchTerms) : Promise.resolve([])
   ]);
+  if (commitResult.status === "rejected") throw commitResult.reason;
+  const commits = commitResult.value;
+  const discussions = discussionResult.status === "fulfilled" ? discussionResult.value : [];
 
   const evidence = uniqueEvidence([...discussions, ...commits])
     .sort((left, right) => new Date(left.date || 0) - new Date(right.date || 0))
